@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Environment files — NEVER commit these
+.env
+.env.local
+.env.production
+.env*.local
+
+# Next.js
+poststudio/.next/
+poststudio/out/
+
+# Build outputs
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Puppeteer Chromium cache (stored in ~/.cache/puppeteer, not here)
+.local-chromium/
