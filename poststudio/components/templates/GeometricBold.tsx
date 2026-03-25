@@ -73,6 +73,7 @@ export default function GeometricBold({
 
       {/* Headline */}
       <h1
+        data-field="headline"
         style={{
           position: "absolute",
           left: 60,
@@ -143,6 +144,7 @@ export default function GeometricBold({
         }}
       >
         <p
+          data-field="caption"
           style={{
             fontFamily: "Inter, sans-serif",
             fontSize: 18,
@@ -161,6 +163,7 @@ export default function GeometricBold({
         </p>
 
         <div
+          data-field="cta"
           style={{
             flexShrink: 0,
             backgroundColor: primaryColor,

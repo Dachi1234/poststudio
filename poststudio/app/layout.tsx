@@ -3,6 +3,7 @@ import { Inter, Space_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import TopNav from "@/components/TopNav"
+import { SessionProvider } from "next-auth/react"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,7 +19,7 @@ const spaceMono = Space_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "PostStudio — by CodeLess",
+  title: "PostStudio — AI Social Media Creator",
   description: "AI-powered social posts, on-brand every time.",
 }
 
@@ -29,12 +30,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" style={{ backgroundColor: "#2E2E2E" }}>
-      <body className={`${inter.variable} ${spaceMono.variable} font-[family-name:var(--font-inter)] antialiased`}>
-        <TopNav />
-        <div className="pt-14">
-          {children}
-        </div>
-        <Toaster />
+      <body
+        className={`${inter.variable} ${spaceMono.variable} font-[family-name:var(--font-inter)] antialiased`}
+      >
+        <SessionProvider>
+          <TopNav />
+          <div className="pt-14">{children}</div>
+          <Toaster />
+        </SessionProvider>
       </body>
     </html>
   )

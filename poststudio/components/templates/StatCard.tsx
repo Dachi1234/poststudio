@@ -44,7 +44,7 @@ export default function StatCard({ headline, caption, cta, primaryColor, colorTh
       }}>CodeLess</span>
 
       {/* Big stat number */}
-      <div style={{
+      <div data-field="headline" style={{
         fontSize: 220, fontWeight: 800, color: accent,
         lineHeight: 0.9, fontFamily: "Inter, sans-serif",
         textAlign: "center", wordBreak: "break-all", maxWidth: 960,
@@ -53,7 +53,7 @@ export default function StatCard({ headline, caption, cta, primaryColor, colorTh
       </div>
 
       {/* Supporting text */}
-      <div style={{
+      <div data-field="caption" style={{
         fontSize: 36, fontWeight: 500,
         color: "rgba(255,255,255,0.7)", textAlign: "center",
         marginTop: 30, maxWidth: 700, lineHeight: 1.3,
@@ -62,14 +62,13 @@ export default function StatCard({ headline, caption, cta, primaryColor, colorTh
       </div>
 
       {/* CTA pill */}
-      <div style={{
+      <div data-field="cta" style={{
         position: "absolute", bottom: 70,
         display: "inline-flex", background: accent,
         borderRadius: 30, padding: "14px 36px",
+        fontSize: 20, fontWeight: 700, color: theme.textDark,
       }}>
-        <span style={{ fontSize: 20, fontWeight: 700, color: theme.textDark }}>
-          {cta}
-        </span>
+        {cta}
       </div>
     </div>
   )

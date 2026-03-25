@@ -61,11 +61,11 @@ export default function BeforeAfter({ headline, cta, primaryColor, colorTheme = 
             color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.12em",
           }}>After CodeLess</span>
         </div>
-        <div style={{ fontSize: 52, fontWeight: 800, color: "white", lineHeight: 1.0, maxWidth: 800 }}>
+        <div data-field="headline" style={{ fontSize: 52, fontWeight: 800, color: "white", lineHeight: 1.0, maxWidth: 800 }}>
           {headline}
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
-          <span style={{ fontSize: 20, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{cta}</span>
+          <span data-field="cta" style={{ fontSize: 20, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>{cta}</span>
           <span style={{
             fontFamily: "'Space Mono', monospace", fontSize: 16, color: "rgba(255,255,255,0.5)",
           }}>CodeLess</span>

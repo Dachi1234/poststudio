@@ -37,7 +37,7 @@ export default function Checklist({ headline, cta, hashtags, primaryColor, color
           fontFamily: "'Space Mono', monospace", fontSize: 16,
           color: accent, textTransform: "uppercase", letterSpacing: "0.1em",
         }}>CodeLess</span>
-        <div style={{ fontSize: 52, fontWeight: 800, color: "#2E2E2E", lineHeight: 1.0, maxWidth: 800 }}>
+        <div data-field="headline" style={{ fontSize: 52, fontWeight: 800, color: "#2E2E2E", lineHeight: 1.0, maxWidth: 800 }}>
           {headline}
         </div>
       </div>
@@ -76,11 +76,12 @@ export default function Checklist({ headline, cta, hashtags, primaryColor, color
 
       {/* Footer */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{
+        <div data-field="cta" style={{
           display: "inline-flex", background: accent,
           borderRadius: 30, padding: "14px 32px",
+          fontSize: 20, fontWeight: 700, color: "white",
         }}>
-          <span style={{ fontSize: 20, fontWeight: 700, color: "white" }}>{cta}</span>
+          {cta}
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           {hashtags.slice(0, 2).map(tag => (

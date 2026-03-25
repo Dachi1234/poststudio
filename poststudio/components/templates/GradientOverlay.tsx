@@ -79,6 +79,7 @@ export default function GradientOverlay({
 
         {/* Headline */}
         <h1
+          data-field="headline"
           style={{
             fontFamily: "Inter, sans-serif",
             fontSize: 80,
@@ -93,6 +94,7 @@ export default function GradientOverlay({
 
         {/* CTA pill */}
         <div
+          data-field="cta"
           style={{
             display: "inline-block",
             backgroundColor: primaryColor,

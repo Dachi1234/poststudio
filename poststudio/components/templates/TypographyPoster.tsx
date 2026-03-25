@@ -41,17 +41,19 @@ export default function TypographyPoster({ headline, cta, hashtags, primaryColor
       }}>CodeLess</span>
 
       {/* Words */}
-      {words.map((word, i) => (
-        <div key={i} style={{
-          fontSize: fontSizeForIndex(i),
-          fontWeight: 800, lineHeight: 0.92,
-          color: i % 2 === 0 ? "#2E2E2E" : accent,
-          fontFamily: "Inter, sans-serif",
-          wordBreak: "break-all",
-        }}>
-          {word}
-        </div>
-      ))}
+      <div data-field="headline" style={{ display: "flex", flexDirection: "column" }}>
+        {words.map((word, i) => (
+          <div key={i} style={{
+            fontSize: fontSizeForIndex(i),
+            fontWeight: 800, lineHeight: 0.92,
+            color: i % 2 === 0 ? "#2E2E2E" : accent,
+            fontFamily: "Inter, sans-serif",
+            wordBreak: "break-all",
+          }}>
+            {word}
+          </div>
+        ))}
+      </div>
 
       {/* Bottom rule + CTA */}
       <div style={{
@@ -59,7 +61,7 @@ export default function TypographyPoster({ headline, cta, hashtags, primaryColor
         display: "flex", justifyContent: "space-between", alignItems: "center",
         borderTop: "2px solid rgba(46,46,46,0.1)", paddingTop: 24,
       }}>
-        <span style={{ fontSize: 20, fontWeight: 600, color: "#2E2E2E" }}>{cta}</span>
+        <span data-field="cta" style={{ fontSize: 20, fontWeight: 600, color: "#2E2E2E" }}>{cta}</span>
         <div style={{ display: "flex", gap: 12 }}>
           {hashtags.slice(0, 2).map(tag => (
             <span key={tag} style={{ fontSize: 15, color: "rgba(46,46,46,0.35)" }}>#{tag}</span>

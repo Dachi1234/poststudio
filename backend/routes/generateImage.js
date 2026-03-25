@@ -10,23 +10,31 @@ const PLATFORM_SIZES = {
   facebook:  { width: 1200, height: 630,  aspect: "16:9" },
 }
 
-function enhancePrompt(prompt, platform, style) {
-  const fmt = platform === "instagram" ? "1:1 square format" : "16:9 landscape format"
+/* ── Style hints for each model ───────────────────────────────────── */
+
+function styleHint(modelKey, platform, brand = {}) {
+  const fmt = platform === "instagram" ? "1:1 square" : "16:9 landscape"
+  const primary = brand.primaryColor || "#FD8D6E"
+  const accent  = brand.accentColor  || "#5A8DEE"
+  const name    = brand.name || "Brand"
 
   const hints = {
-    flux:        `Shot on iPhone 15 Pro, candid editorial, shallow depth of field, warm natural window light, slightly warm color grade. Coral #FD8D6E and blue #5A8DEE as subtle accents. No text overlays. No watermarks. ${fmt}.`,
-    "flux-pro":  `Editorial lifestyle photography, shallow depth of field, warm natural light, slightly desaturated warm color grade. Coral #FD8D6E and blue #5A8DEE color accents. Professional photorealistic. No text. No watermarks. ${fmt}.`,
-    recraft:     `CodeLess brand. Coral #FD8D6E and blue #5A8DEE palette. Clean minimal graphic design. Professional marketing material. Georgian young professionals. Warm friendly tone. ${fmt}.`,
-    ideogram:          `CodeLess brand. Coral #FD8D6E and blue #5A8DEE palette. Clean minimal layout. Inter font style. Warm professional. Georgian context. High quality. ${fmt}.`,
-    "nano-banana":     `Warm natural lighting, slightly warm color grade. Coral #FD8D6E and blue #5A8DEE accents. Professional lifestyle. Georgian young professionals. No text overlays. ${fmt}.`,
-    "nano-banana-pro": `CodeLess brand. Coral #FD8D6E and blue #5A8DEE palette. Inter font for any text. Clean minimal graphic design. Warm professional. Georgian context. High fidelity. ${fmt}.`,
+    "gpt-image":      `Photorealistic, highly detailed, professional composition, cinematic lighting, ${fmt} social media post. No watermarks.`,
+    "nano-banana-pro":`${name} brand. ${primary} and ${accent} palette. Clean minimal design. Warm professional. High fidelity. ${fmt}.`,
+    "flux-2-max":     `Top-tier editorial photography, ultra-realistic, professional lighting, ${primary} and ${accent} accents. Award-winning composition. No text overlays. ${fmt}.`,
+    "flux-2-pro":     `Professional photorealistic, editorial lifestyle photography, shallow depth of field, warm natural light. ${primary} and ${accent} accents. No watermarks. ${fmt}.`,
+    "recraft-v4-svg": `Clean vector illustration, geometric shapes, brand-aligned graphic design. ${primary} and ${accent} palette. Minimal, scalable, professional. ${fmt}.`,
+    "flux-2-flex":    `Sharp typography-friendly photography, precise details, professional marketing material. ${primary} and ${accent} color palette. Clean composition. ${fmt}.`,
+    "ideogram-v3":    `${name} brand. ${primary} and ${accent} palette. Clean layout, precise text rendering. Warm professional. High quality. ${fmt}.`,
+    "recraft-v4":     `Professional graphic design, bold visual identity, ${primary} and ${accent} palette. Clean, modern. ${fmt}.`,
   }
-
-  return `${prompt}. ${hints[style] || hints.flux}`
+  return hints[modelKey] || hints["flux-2-pro"]
 }
 
-async function runModel(model, input) {
-  const output = await replicate.run(model, { input })
+/* ── Universal output extractor ───────────────────────────────────── */
+
+async function runModel(modelId, input) {
+  const output = await replicate.run(modelId, { input })
   if (Array.isArray(output)) {
     const first = output[0]
     if (typeof first === "string") return first
@@ -34,137 +42,86 @@ async function runModel(model, input) {
   }
   if (typeof output === "string") return output
   if (output && typeof output.url === "function") return output.url()
-  throw new Error(`Unexpected output format from ${model}`)
+  throw new Error(`Unexpected output format from ${modelId}: ${JSON.stringify(output)}`)
 }
 
-// FLUX Schnell — fast preview
-router.post("/generate-image/flux", async (req, res) => {
-  const { prompt, platform } = req.body
-  if (!prompt || !platform) return res.status(400).json({ error: "Missing prompt or platform" })
+/* ── Route factory ────────────────────────────────────────────────── */
 
-  const { width, height } = PLATFORM_SIZES[platform] || PLATFORM_SIZES.instagram
-  // FLUX requires dimensions divisible by 16
-  const w = Math.round(width  / 16) * 16
-  const h = Math.round(height / 16) * 16
+function makeRoute(modelKey, modelId, buildInput) {
+  return router.post(`/generate-image/${modelKey}`, async (req, res) => {
+    const { prompt, platform, brand } = req.body
+    if (!prompt || !platform) {
+      return res.status(400).json({ error: "Missing prompt or platform" })
+    }
+    const sizes    = PLATFORM_SIZES[platform] || PLATFORM_SIZES.instagram
+    const enhanced = `${prompt}. ${styleHint(modelKey, platform, brand)}`
 
-  try {
-    const imageUrl = await runModel("black-forest-labs/flux-schnell", {
-      prompt: enhancePrompt(prompt, platform, "flux"),
-      width: w, height: h,
-      num_outputs: 1,
-      output_format: "webp",
-    })
-    return res.json({ imageUrl })
-  } catch (err) {
-    console.error("FLUX error:", err)
-    return res.status(500).json({ error: "Image generation failed", detail: err.message })
+    try {
+      const imageUrl = await runModel(modelId, buildInput(enhanced, platform, sizes))
+      return res.json({ imageUrl })
+    } catch (err) {
+      console.error(`[${modelKey}] error:`, err.message)
+      return res.status(500).json({ error: "Image generation failed", detail: err.message })
+    }
+  })
+}
+
+/* ── FLUX.2 helpers ────────────────────────────────────────────────── */
+
+function flux2Input(prompt, platform, sizes) {
+  return {
+    prompt,
+    aspect_ratio: sizes.aspect,    // "1:1" | "16:9"
+    output_format: "webp",
+    output_quality: 90,
   }
+}
+
+/* ── Register all 8 models ─────────────────────────────────────────── */
+
+// 1. GPT Image 1.5
+makeRoute("gpt-image", "openai/gpt-image-1.5", (prompt, platform, sizes) => ({
+  prompt,
+  aspect_ratio: sizes.aspect,
+  quality: "high",
+  output_format: "webp",
+}))
+
+// 2. Nano Banana Pro (Google Imagen 3)
+makeRoute("nano-banana-pro", "google/imagen-3", (prompt, platform, sizes) => ({
+  prompt,
+  aspect_ratio: sizes.aspect,
+}))
+
+// 3. FLUX.2 Max
+makeRoute("flux-2-max", "black-forest-labs/flux-2-max", flux2Input)
+
+// 4. FLUX.2 Pro
+makeRoute("flux-2-pro", "black-forest-labs/flux-2-pro", flux2Input)
+
+// 5. Recraft V4 SVG (vector output — URL to .svg file, works in <img> tags)
+makeRoute("recraft-v4-svg", "recraft-ai/recraft-v4-svg", (prompt, _platform, sizes) => {
+  const w = Math.round(sizes.width  / 64) * 64
+  const h = Math.round(sizes.height / 64) * 64
+  return { prompt, width: w, height: h }
 })
 
-// FLUX Pro — best quality photo
-router.post("/generate-image/flux-pro", async (req, res) => {
-  const { prompt, platform } = req.body
-  if (!prompt || !platform) return res.status(400).json({ error: "Missing prompt or platform" })
+// 6. FLUX.2 Flex
+makeRoute("flux-2-flex", "black-forest-labs/flux-2-flex", flux2Input)
 
-  const { width, height } = PLATFORM_SIZES[platform] || PLATFORM_SIZES.instagram
-  const w = Math.round(width  / 16) * 16
-  const h = Math.round(height / 16) * 16
+// 7. Ideogram v3
+makeRoute("ideogram-v3", "ideogram-ai/ideogram-v3-balanced", (prompt, platform, sizes) => ({
+  prompt,
+  aspect_ratio: sizes.aspect,
+  style_type: "DESIGN",
+  magic_prompt_option: "AUTO",
+}))
 
-  try {
-    const imageUrl = await runModel("black-forest-labs/flux-1.1-pro", {
-      prompt: enhancePrompt(prompt, platform, "flux-pro"),
-      width: w, height: h,
-      output_format: "webp",
-      output_quality: 90,
-      safety_tolerance: 2,
-    })
-    return res.json({ imageUrl })
-  } catch (err) {
-    console.error("FLUX Pro error:", err)
-    return res.status(500).json({ error: "Image generation failed", detail: err.message })
-  }
-})
-
-// Recraft v3 — graphic design / illustration
-router.post("/generate-image/recraft", async (req, res) => {
-  const { prompt, platform, style: recraftStyle } = req.body
-  if (!prompt || !platform) return res.status(400).json({ error: "Missing prompt or platform" })
-
-  const { width, height } = PLATFORM_SIZES[platform] || PLATFORM_SIZES.instagram
-  // Recraft requires dimensions divisible by 64
-  const w = Math.round(width  / 64) * 64
-  const h = Math.round(height / 64) * 64
-
-  try {
-    const imageUrl = await runModel("recraft-ai/recraft-v3", {
-      prompt: enhancePrompt(prompt, platform, "recraft"),
-      style: recraftStyle || "digital_illustration",
-      width: w, height: h,
-    })
-    return res.json({ imageUrl })
-  } catch (err) {
-    console.error("Recraft error:", err)
-    return res.status(500).json({ error: "Image generation failed", detail: err.message })
-  }
-})
-
-// Ideogram v3 Turbo — text-friendly graphic design
-router.post("/generate-image/ideogram", async (req, res) => {
-  const { prompt, platform } = req.body
-  if (!prompt || !platform) return res.status(400).json({ error: "Missing prompt or platform" })
-
-  const { aspect } = PLATFORM_SIZES[platform] || PLATFORM_SIZES.instagram
-
-  try {
-    const imageUrl = await runModel("ideogram-ai/ideogram-v3-turbo", {
-      prompt: enhancePrompt(prompt, platform, "ideogram"),
-      aspect_ratio: aspect,
-      style_type: "REALISTIC",
-      magic_prompt_option: "AUTO",
-    })
-    return res.json({ imageUrl })
-  } catch (err) {
-    console.error("Ideogram error:", err)
-    return res.status(500).json({ error: "Image generation failed", detail: err.message })
-  }
-})
-
-// Nano Banana 2 — fast, Google model
-router.post("/generate-image/nano-banana", async (req, res) => {
-  const { prompt, platform } = req.body
-  if (!prompt || !platform) return res.status(400).json({ error: "Missing prompt or platform" })
-
-  const { aspect } = PLATFORM_SIZES[platform] || PLATFORM_SIZES.instagram
-
-  try {
-    const imageUrl = await runModel("google/imagen-3-fast", {
-      prompt: enhancePrompt(prompt, platform, "nano-banana"),
-      aspect_ratio: aspect,
-    })
-    return res.json({ imageUrl })
-  } catch (err) {
-    console.error("Nano Banana 2 error:", err)
-    return res.status(500).json({ error: "Image generation failed", detail: err.message })
-  }
-})
-
-// Nano Banana Pro — high quality, Google model
-router.post("/generate-image/nano-banana-pro", async (req, res) => {
-  const { prompt, platform } = req.body
-  if (!prompt || !platform) return res.status(400).json({ error: "Missing prompt or platform" })
-
-  const { aspect } = PLATFORM_SIZES[platform] || PLATFORM_SIZES.instagram
-
-  try {
-    const imageUrl = await runModel("google/imagen-3", {
-      prompt: enhancePrompt(prompt, platform, "nano-banana-pro"),
-      aspect_ratio: aspect,
-    })
-    return res.json({ imageUrl })
-  } catch (err) {
-    console.error("Nano Banana Pro error:", err)
-    return res.status(500).json({ error: "Image generation failed", detail: err.message })
-  }
+// 8. Recraft V4
+makeRoute("recraft-v4", "recraft-ai/recraft-v4", (prompt, _platform, sizes) => {
+  const w = Math.round(sizes.width  / 64) * 64
+  const h = Math.round(sizes.height / 64) * 64
+  return { prompt, width: w, height: h, style: "digital_illustration" }
 })
 
 module.exports = router

@@ -49,6 +49,7 @@ export default function SplitLayout({
           <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
             <div>
               <h1
+                data-field="headline"
                 style={{
                   fontFamily: "Inter, sans-serif",
                   fontSize: 64,
@@ -61,6 +62,7 @@ export default function SplitLayout({
                 {headline}
               </h1>
               <p
+                data-field="cta"
                 style={{
                   fontFamily: "Inter, sans-serif",
                   fontSize: 20,
@@ -161,6 +163,7 @@ export default function SplitLayout({
         }}
       >
         <p
+          data-field="caption"
           style={{
             fontFamily: "Inter, sans-serif",
             fontSize: 16,

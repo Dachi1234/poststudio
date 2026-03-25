@@ -43,7 +43,7 @@ export default function BigQuote({ headline, cta, hashtags, primaryColor, colorT
         alignItems: "flex-start", gap: 36,
         padding: "0 80px", maxWidth: 960, position: "relative",
       }}>
-        <div style={{
+        <div data-field="headline" style={{
           fontSize: 62, fontWeight: 700, color: theme.text, lineHeight: 1.1,
         }}>
           {headline}
@@ -55,13 +55,12 @@ export default function BigQuote({ headline, cta, hashtags, primaryColor, colorT
             color: "rgba(255,255,255,0.6)",
           }}>CodeLess Student</span>
         </div>
-        <div style={{
+        <div data-field="cta" style={{
           display: "inline-flex", background: "rgba(255,255,255,0.15)",
           borderRadius: 30, padding: "12px 30px",
+          fontSize: 18, fontWeight: 600, color: theme.text,
         }}>
-          <span style={{ fontSize: 18, fontWeight: 600, color: theme.text }}>
-            {cta}
-          </span>
+          {cta}
         </div>
       </div>
 

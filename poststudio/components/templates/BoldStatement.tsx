@@ -109,6 +109,7 @@ export default function BoldStatement({
         </p>
 
         <h1
+          data-field="headline"
           style={{
             fontFamily: "Inter, sans-serif",
             fontSize: 96,
@@ -132,6 +133,7 @@ export default function BoldStatement({
         />
 
         <p
+          data-field="cta"
           style={{
             fontFamily: "Inter, sans-serif",
             fontSize: 24,

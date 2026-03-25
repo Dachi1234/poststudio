@@ -42,14 +42,14 @@ export default function MinimalCard({ headline, caption, cta, hashtags, primaryC
         display: "flex", flexDirection: "column",
         alignItems: "center", gap: 40, textAlign: "center",
       }}>
-        <div style={{
+        <div data-field="headline" style={{
           fontSize: 72, fontWeight: 800, color: "#2E2E2E",
           lineHeight: 1.05, maxWidth: 840,
         }}>
           {headline}
         </div>
         <div style={{ width: 100, height: 5, borderRadius: 3, background: accent }} />
-        <div style={{
+        <div data-field="caption" style={{
           fontSize: 28, fontWeight: 400,
           color: "rgba(46,46,46,0.55)", lineHeight: 1.5, maxWidth: 700,
         }}>
@@ -62,11 +62,12 @@ export default function MinimalCard({ headline, caption, cta, hashtags, primaryC
         position: "absolute", bottom: 65,
         display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
       }}>
-        <div style={{
+        <div data-field="cta" style={{
           display: "inline-flex", background: accent,
           borderRadius: 30, padding: "14px 40px",
+          fontSize: 20, fontWeight: 700, color: "white",
         }}>
-          <span style={{ fontSize: 20, fontWeight: 700, color: "white" }}>{cta}</span>
+          {cta}
         </div>
         <div style={{ display: "flex", gap: 14 }}>
           {hashtags.slice(0, 3).map(tag => (
